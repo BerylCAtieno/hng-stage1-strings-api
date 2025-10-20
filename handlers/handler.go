@@ -15,15 +15,23 @@ import (
 
 // POST /strings
 func CreateStringHandler(w http.ResponseWriter, r *http.Request) {
+	// Check Content-Type header first
+	if !strings.HasPrefix(r.Header.Get("Content-Type"), "application/json") {
+		http.Error(w, "Content-Type must be application/json", http.StatusUnsupportedMediaType)
+		return
+	}
+
 	var req struct {
 		Value string `json:"value"`
 	}
 
+	// Check for invalid JSON
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		http.Error(w, "invalid JSON format", http.StatusUnprocessableEntity)
 		return
 	}
 
+	// Check for missing value field
 	if req.Value == "" {
 		http.Error(w, `"value" field is required`, http.StatusBadRequest)
 		return
@@ -58,7 +66,7 @@ func CreateStringHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusCreated) // 201 for successful creation
 	json.NewEncoder(w).Encode(resp)
 }
 
