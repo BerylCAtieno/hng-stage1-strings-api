@@ -3,8 +3,11 @@ package database
 import (
 	"database/sql"
 	"encoding/json"
+	"os"
 	"time"
 
+	"github.com/BerylCAtieno/string-analyzer/analysis"
+	"github.com/BerylCAtieno/string-analyzer/models"
 	_ "modernc.org/sqlite"
 )
 
@@ -12,6 +15,11 @@ var DB *sql.DB
 
 // InitDB initializes a SQLite database and creates a table strings if it does not exist
 func InitDB() error {
+
+	if err := os.MkdirAll("./data", os.ModePerm); err != nil {
+		return err
+	}
+
 	var err error
 	DB, err = sql.Open("sqlite", "./data/strings.db")
 	if err != nil {
@@ -64,14 +72,14 @@ func DeleteString(value string) error {
 }
 
 // GetAllStrings gets all strings
-func GetAllStrings() ([]map[string]any, error) {
+func GetAllStrings() ([]models.StringReponsePayload, error) {
 	rows, err := DB.Query(`SELECT id, value, properties, created_at FROM strings`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var results []map[string]any
+	var results []models.StringReponsePayload
 
 	for rows.Next() {
 		var id, value, propsJSON, createdAt string
@@ -79,16 +87,16 @@ func GetAllStrings() ([]map[string]any, error) {
 			return nil, err
 		}
 
-		var props map[string]any
+		var props analysis.Properties
 		if err := json.Unmarshal([]byte(propsJSON), &props); err != nil {
 			return nil, err
 		}
 
-		results = append(results, map[string]any{
-			"id":         id,
-			"value":      value,
-			"properties": props,
-			"created_at": createdAt,
+		results = append(results, models.StringReponsePayload{
+			Id:         id,
+			Value:      value,
+			Properties: props,
+			CreatedAt:  createdAt,
 		})
 	}
 
