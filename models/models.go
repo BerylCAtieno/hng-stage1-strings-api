@@ -10,18 +10,18 @@ type StringReponsePayload struct {
 }
 
 type FilterPayload struct {
-	Data           []analysis.Properties `json:"data"`
-	Count          int                   `json:"count"`
-	FiltersApplied map[string]any        `json:"filters_applied"`
+	Data           []StringReponsePayload `json:"data"`
+	Count          int                    `json:"count"`
+	FiltersApplied map[string]any         `json:"filters_applied"`
 }
 
 type InterpretedQuery struct {
-	Original      string                `json:"original"`
-	ParsedFilters []analysis.Properties `json:"parsed_filters"`
+	Original      string         `json:"original"`
+	ParsedFilters map[string]any `json:"parsed_filters"`
 }
 
 type NLPFilterPayload struct {
-	Data             []analysis.Properties `json:"data"`
-	Count            int                   `json:"count"`
-	InterpretedQuery InterpretedQuery      `'json:"interpreted_query"`
+	Data             []StringReponsePayload `json:"data"`
+	Count            int                    `json:"count"`
+	InterpretedQuery InterpretedQuery       `json:"interpreted_query"`
 }

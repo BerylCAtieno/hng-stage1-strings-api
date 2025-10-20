@@ -8,7 +8,9 @@ import (
 
 	"github.com/BerylCAtieno/string-analyzer/analysis"
 	"github.com/BerylCAtieno/string-analyzer/database"
+	"github.com/BerylCAtieno/string-analyzer/filtering"
 	"github.com/BerylCAtieno/string-analyzer/models"
+	"github.com/BerylCAtieno/string-analyzer/nlp"
 )
 
 // POST /strings
@@ -61,6 +63,12 @@ func CreateStringHandler(w http.ResponseWriter, r *http.Request) {
 
 // GET /strings
 func GetAllStringsHandler(w http.ResponseWriter, r *http.Request) {
+	// Check if there are any filter parameters
+	if len(r.URL.Query()) > 0 {
+		handleFilteredStrings(w, r)
+		return
+	}
+
 	results, err := database.GetAllStrings()
 	if err != nil {
 		http.Error(w, "failed to fetch strings", http.StatusInternalServerError)
@@ -69,6 +77,65 @@ func GetAllStringsHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(results)
+}
+
+func handleFilteredStrings(w http.ResponseWriter, r *http.Request) {
+	filters, err := filtering.ParseQueryParams(r)
+	if err != nil {
+		http.Error(w, "invalid filter parameters", http.StatusBadRequest)
+		return
+	}
+
+	results, err := database.GetAllStrings()
+	if err != nil {
+		http.Error(w, "failed to fetch strings", http.StatusInternalServerError)
+		return
+	}
+
+	filtered := filtering.ApplyFilters(results, filters)
+
+	response := models.FilterPayload{
+		Data:           filtered,
+		Count:          len(filtered),
+		FiltersApplied: filters,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func NaturalLanguageFilterHandler(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("query")
+	if query == "" {
+		http.Error(w, "query parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	filters, err := nlp.ParseNaturalLanguageQuery(query)
+	if err != nil {
+		http.Error(w, "unable to parse natural language query", http.StatusBadRequest)
+		return
+	}
+
+	results, err := database.GetAllStrings()
+	if err != nil {
+		http.Error(w, "failed to fetch strings", http.StatusInternalServerError)
+		return
+	}
+
+	filtered := filtering.ApplyFilters(results, filters)
+
+	response := models.NLPFilterPayload{
+		Data:  filtered, // Now correctly using []models.StringReponsePayload
+		Count: len(filtered),
+		InterpretedQuery: models.InterpretedQuery{
+			Original:      query,
+			ParsedFilters: filters,
+		},
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
 
 // GET /strings/{string_value}

@@ -29,3 +29,7 @@ func AnalyzeString(s string) (Properties, error) {
 	return properties, nil
 
 }
+
+func AnalyzeHashOnly(s string) string {
+	return utils.GenerateId(s)
+}
