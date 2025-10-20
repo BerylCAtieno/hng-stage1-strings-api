@@ -16,27 +16,23 @@ func RegisterRoutes() {
 		handlers.NaturalLanguageFilterHandler(w, r)
 	})
 
-	// POST /strings  -> Create new string analysis
-	// GET  /strings  -> Get all stored strings (with optional filtering)
-	http.HandleFunc("/strings", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodPost:
-			handlers.CreateStringHandler(w, r)
-		case http.MethodGet:
-			handlers.GetAllStringsHandler(w, r)
-		default:
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		}
-	})
-
-	// GET /strings/{value}   -> Get details for a specific string
-	// DELETE /strings/{value} -> Delete a string
 	http.HandleFunc("/strings/", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
 			handlers.GetStringHandler(w, r)
 		case http.MethodDelete:
 			handlers.DeleteStringHandler(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
+
+	http.HandleFunc("/strings", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			handlers.CreateStringHandler(w, r)
+		case http.MethodGet:
+			handlers.GetAllStringsHandler(w, r)
 		default:
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		}
