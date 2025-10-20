@@ -23,8 +23,9 @@ func CreateStringHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
+
 	if req.Value == "" {
-		http.Error(w, `"value" field cannot be empty`, http.StatusBadRequest)
+		http.Error(w, `"value" field is required`, http.StatusBadRequest)
 		return
 	}
 
@@ -75,7 +76,13 @@ func GetAllStringsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Ensure results is never nil - return empty array instead
+	if results == nil {
+		results = []models.StringReponsePayload{}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(results)
 }
 
@@ -92,7 +99,17 @@ func handleFilteredStrings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Ensure results is never nil
+	if results == nil {
+		results = []models.StringReponsePayload{}
+	}
+
 	filtered := filtering.ApplyFilters(results, filters)
+
+	// Ensure filtered is never nil - return empty array instead
+	if filtered == nil {
+		filtered = []models.StringReponsePayload{}
+	}
 
 	response := models.FilterPayload{
 		Data:           filtered,
@@ -101,6 +118,7 @@ func handleFilteredStrings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -123,10 +141,20 @@ func NaturalLanguageFilterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Ensure results is never nil
+	if results == nil {
+		results = []models.StringReponsePayload{}
+	}
+
 	filtered := filtering.ApplyFilters(results, filters)
 
+	// Ensure filtered is never nil - return empty array instead
+	if filtered == nil {
+		filtered = []models.StringReponsePayload{}
+	}
+
 	response := models.NLPFilterPayload{
-		Data:  filtered, // Now correctly using []models.StringReponsePayload
+		Data:  filtered,
 		Count: len(filtered),
 		InterpretedQuery: models.InterpretedQuery{
 			Original:      query,
@@ -135,6 +163,7 @@ func NaturalLanguageFilterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -166,6 +195,7 @@ func GetStringHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
 }
 
