@@ -8,8 +8,16 @@ import (
 
 // RegisterRoutes configures all API routes for the string analyzer
 func RegisterRoutes() {
+	http.HandleFunc("/strings/filter-by-natural-language", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		handlers.NaturalLanguageFilterHandler(w, r)
+	})
+
 	// POST /strings  -> Create new string analysis
-	// GET  /strings  -> Get all stored strings
+	// GET  /strings  -> Get all stored strings (with optional filtering)
 	http.HandleFunc("/strings", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
@@ -32,14 +40,6 @@ func RegisterRoutes() {
 		default:
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		}
-	})
-
-	http.HandleFunc("/strings/filter-by-natural-language", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-		handlers.NaturalLanguageFilterHandler(w, r)
 	})
 
 	// Health check route
