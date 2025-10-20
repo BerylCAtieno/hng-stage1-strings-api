@@ -41,13 +41,13 @@ func UniqueCharacters(s string) int {
 }
 
 // CharFrequency returns a map of character frequencies in a string.
-func CharFrequency(s string) map[rune]int {
-	frequency := make(map[rune]int)
+func CharFrequency(s string) map[string]int {
+	frequency := make(map[string]int)
 	for _, char := range s {
 		if unicode.IsSpace(char) {
 			continue
 		}
-		frequency[unicode.ToLower(char)]++
+		frequency[string(unicode.ToLower(char))]++
 	}
 	return frequency
 }
