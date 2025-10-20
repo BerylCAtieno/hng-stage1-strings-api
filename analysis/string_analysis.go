@@ -18,7 +18,7 @@ func AnalyzeString(s string) (Properties, error) {
 	}
 
 	properties := Properties{
-		"length ":                 utils.Length(s),
+		"length":                  utils.Length(s),
 		"is_palindrome":           utils.IsPalindrome(s),
 		"unique_characters":       utils.UniqueCharacters(s),
 		"word_count":              utils.NumberOfWords(s),
